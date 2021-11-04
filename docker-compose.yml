@@ -8,10 +8,10 @@ services:
       - ENVIRONMENT=dev
       - CHAOS_MONKEY_ENABLED=true
       - CHAOS_MONKEY_MODE=critical
-      - CHAOS_MONKEY_LATENCY=false
-      - CHAOS_MONKEY_EXCEPTION=false
+      - CHAOS_MONKEY_LATENCY=true
+      - CHAOS_MONKEY_EXCEPTION=true
       - CHAOS_MONKEY_APP_KILLER=false
-      - CHAOS_MONKEY_MEMORY=false
+      - CHAOS_MONKEY_MEMORY=true
     ports:
         - 1000:8080
     volumes:
@@ -24,10 +24,10 @@ services:
       - ENVIRONMENT=dev
       - CHAOS_MONKEY_ENABLED=true
       - CHAOS_MONKEY_MODE=critical
-      - CHAOS_MONKEY_LATENCY=false
-      - CHAOS_MONKEY_EXCEPTION=false
+      - CHAOS_MONKEY_LATENCY=true
+      - CHAOS_MONKEY_EXCEPTION=true
       - CHAOS_MONKEY_APP_KILLER=false
-      - CHAOS_MONKEY_MEMORY=false
+      - CHAOS_MONKEY_MEMORY=true
     ports:
         - 2000:8080
     volumes:
@@ -42,7 +42,7 @@ services:
       - CHAOS_MONKEY_MODE=critical
       - CHAOS_MONKEY_LATENCY=true
       - CHAOS_MONKEY_EXCEPTION=true
-      - CHAOS_MONKEY_APP_KILLER=true
+      - CHAOS_MONKEY_APP_KILLER=false
       - CHAOS_MONKEY_MEMORY=true
     ports:
         - 3000:8080
@@ -58,7 +58,7 @@ services:
       - CHAOS_MONKEY_MODE=critical
       - CHAOS_MONKEY_LATENCY=true
       - CHAOS_MONKEY_EXCEPTION=true
-      - CHAOS_MONKEY_APP_KILLER=true
+      - CHAOS_MONKEY_APP_KILLER=false
       - CHAOS_MONKEY_MEMORY=true
     ports:
         - 4000:8080

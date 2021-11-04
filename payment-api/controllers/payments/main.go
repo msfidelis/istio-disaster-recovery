@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"fmt"
 	"payment-api/pkg/logger"
+	"payment-api/pkg/httpclient"
 	"github.com/gin-gonic/gin"
 	"github.com/bxcodec/faker/v3"
 )
@@ -33,6 +34,27 @@ func Get(c *gin.Context) {
 	}
 
 	response.OrderId = c.Param("id")
+
+	if (response.PaymentMethod == "cc") {
+		headers := make(map[string][]string)
+		headers["Content-type"] = append(headers["Content-type"], "Application/json")
+	
+		// Get Clients - Mock
+		responseCC, body := httpclient.Request("POST", "http://cc-api:8080", "/cc", headers, "{}")
+
+		if responseCC.StatusCode != 200 {
+			log.Error().
+				Str("response for cc-api", body).
+				Int("status_code", responseCC.StatusCode).
+				Msg("Failed to retrieve a credit card information")
+	
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "Internal Server Error",
+				"component": "cc-api",
+			})
+			return
+		}
+	}
 
 	log.Info().
 		Str("OrderId", response.OrderId).

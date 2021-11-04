@@ -58,7 +58,20 @@ func Get(c *gin.Context) {
 	headers["Content-type"] = append(headers["Content-type"], "Application/json")
 
 	// Get Clients - Mock
-	_, body := httpclient.Request("GET", "http://clients-api:8080", "/faker", headers, "{}")
+	responseClients, body := httpclient.Request("GET", "http://clients-api:8080", "/clients", headers, "{}")
+
+	if responseClients.StatusCode != 200 {
+		log.Error().
+			Str("response for clients-api", body).
+			Int("status_code", responseClients.StatusCode).
+			Msg("Failed to retrieve a client")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal Server Error",
+			"component": "clients-api",
+		})
+		return
+	}
 
 	json.Unmarshal([]byte(body ), &client)
 
@@ -67,7 +80,20 @@ func Get(c *gin.Context) {
 	response.Client.PhoneNumber = client.PhoneNumber
 
 	// Get Payment
-	_, bodyPayment := httpclient.Request("GET", "http://payment-api:8080", fmt.Sprintf("/payments/%v", response.OrderId), headers, "{}")
+	responsePayments, bodyPayment := httpclient.Request("GET", "http://payment-api:8080", fmt.Sprintf("/payments/%v", response.OrderId), headers, "{}")
+
+	if responsePayments.StatusCode != 200 {
+		log.Error().
+			Str("response for payment-api", body).
+			Int("status_code", responseClients.StatusCode).
+			Msg("Failed to retrieve a payment information")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal Server Error",
+			"component": "payment-api",
+		})
+		return
+	}
 
 	json.Unmarshal([]byte(bodyPayment), &payment)
 

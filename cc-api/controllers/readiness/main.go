@@ -2,8 +2,8 @@ package readiness
 
 import (
 	"github.com/gin-gonic/gin"
-	"orders-api/pkg/logger"
-	"orders-api/pkg/memory_cache"
+	"cc-api/pkg/logger"
+	"cc-api/pkg/memory_cache"
 	"net/http"
 )
 

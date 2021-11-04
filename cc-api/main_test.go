@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"orders-api/pkg/configuration"
+	"cc-api/pkg/configuration"
 )
 
 func TestPkgConfigurationLoad(t *testing.T) {

@@ -3,7 +3,7 @@ FROM golang:1.15 AS builder
 # Install Air
 RUN go get -u github.com/cosmtrek/air
 
-WORKDIR $GOPATH/src/orders-api
+WORKDIR $GOPATH/src/cc-api
 
 COPY . ./
 

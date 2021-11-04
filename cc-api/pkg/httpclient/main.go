@@ -1,7 +1,7 @@
 package httpclient
 
 import (
-	"orders-api/pkg/logger"
+	"cc-api/pkg/logger"
 	"fmt"
 	"io/ioutil"
 	"net/http"

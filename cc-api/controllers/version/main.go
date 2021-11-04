@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"orders-api/pkg/configuration"
+	"cc-api/pkg/configuration"
 )
 
 type Response struct {

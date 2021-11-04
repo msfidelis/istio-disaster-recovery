@@ -1,14 +1,16 @@
-package orders
+package cc
 
 import (
 	"net/http"
-	"encoding/json"
-	"orders-api/pkg/logger"
+	// "encoding/json"
+	"github.com/bxcodec/faker/v3"
+	"fmt"
+	"cc-api/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
-	OrderId string `json: "id" faker:"uuid_hyphenated"`
+	Token string `faker:"uuid_hyphenated" json:"token" binding:"required"`
 }
 
 // Ok godoc
@@ -25,6 +27,11 @@ func Get(c *gin.Context) {
 
 	headers := make(map[string][]string)
 	headers["Content-type"] = append(headers["Content-type"], "Application/json")
+
+	err := faker.FakeData(&response)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	log.Info().
 		Str("Credit card tokenized retrieved", "true").

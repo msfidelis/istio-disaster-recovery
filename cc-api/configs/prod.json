@@ -1,5 +1,5 @@
 {
-    "Application": "orders-api",
+    "Application": "cc-api",
     "Env": "prod",
     "Version": "v1"
 }

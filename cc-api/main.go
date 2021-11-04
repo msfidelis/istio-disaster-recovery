@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/gin-contrib/logger"
-	"orders-api/controllers/healthcheck"
-	"orders-api/controllers/liveness"
-	"orders-api/controllers/readiness"
-	"orders-api/controllers/version"
-	"orders-api/controllers/cc"
-	"orders-api/pkg/memory_cache"
+	"cc-api/controllers/healthcheck"
+	"cc-api/controllers/liveness"
+	"cc-api/controllers/readiness"
+	"cc-api/controllers/version"
+	"cc-api/controllers/cc"
+	"cc-api/pkg/memory_cache"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -16,7 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	_ "orders-api/docs"
+	_ "cc-api/docs"
 
 	"fmt"
 	"os"
@@ -80,7 +80,7 @@ func main() {
 	router.GET("/readiness", readiness.Ok)
 
 	// orders 
-	router.GET("/cc", cc.Get)
+	router.POST("/cc", cc.Get)
 
 	router.Run()
 }

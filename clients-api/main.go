@@ -6,7 +6,7 @@ import (
 	"clients-api/controllers/liveness"
 	"clients-api/controllers/readiness"
 	"clients-api/controllers/version"
-	"clients-api/controllers/faker"
+	"clients-api/controllers/clients"
 	"clients-api/pkg/memory_cache"
 
 	"github.com/rs/zerolog"
@@ -35,7 +35,7 @@ func main() {
 	log.Logger = log.Output(
 		zerolog.ConsoleWriter{
 			Out:     os.Stderr,
-			NoColor: false,
+			NoColor: true,
 		},
 	)
 	subLog := zerolog.New(os.Stdout).With().Logger()
@@ -79,8 +79,8 @@ func main() {
 	router.GET("/liveness", liveness.Ok)
 	router.GET("/readiness", readiness.Ok)
 
-	// Faker 
-	router.GET("/faker", faker.Faker)
+	// clients 
+	router.GET("/clients", clients.Clients)
 
 	router.Run()
 }
