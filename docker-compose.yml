@@ -28,6 +28,8 @@ services:
       - CHAOS_MONKEY_EXCEPTION=true
       - CHAOS_MONKEY_APP_KILLER=false
       - CHAOS_MONKEY_MEMORY=true
+      - CLIENTS_API_HOST=http://clients-api:8080
+      - PAYMENT_API_HOST=http://payment-api:8080
     ports:
         - 2000:8080
     volumes:
@@ -44,6 +46,7 @@ services:
       - CHAOS_MONKEY_EXCEPTION=true
       - CHAOS_MONKEY_APP_KILLER=false
       - CHAOS_MONKEY_MEMORY=true
+      - CC_API_HOST=http://cc-api:8080
     ports:
         - 3000:8080
     volumes:

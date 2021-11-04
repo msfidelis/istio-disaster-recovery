@@ -11,63 +11,73 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/Depado/ginprom"
 
 	chaos "github.com/msfidelis/gin-chaos-monkey"
 
 	"github.com/gin-gonic/gin"
 
-	_ "cc-api/docs"
 
 	"fmt"
 	"os"
+	"io"
 	"strconv"
 	"time"
 )
 
 func main() {
 
+	router := gin.New()
+
+	// Logger
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if gin.IsDebugging() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	// logger
 	log.Logger = log.Output(
 		zerolog.ConsoleWriter{
 			Out:     os.Stderr,
 			NoColor: false,
 		},
 	)
-	subLog := zerolog.New(os.Stdout).With().Logger()
 
 	// Memory Cache Singleton
 	c := memory_cache.GetInstance()
 
-	// Readiness Probe Mock Config - Warmup in Seconds
+	// Readiness Probe Mock Config
 	probe_time_raw := os.Getenv("READINESS_PROBE_MOCK_TIME_IN_SECONDS")
 	if probe_time_raw == "" {
-		probe_time_raw = "5" // 5 Seconds after boot to success readiness response ok
+		probe_time_raw = "5"
 	}
 	probe_time, err := strconv.ParseUint(probe_time_raw, 10, 64)
 	if err != nil {
 		fmt.Println("Environment variable READINESS_PROBE_MOCK_TIME_IN_SECONDS conversion error", err)
 	}
-
-	// Set time in Memory Cache
 	c.Set("readiness.ok", "false", time.Duration(probe_time)*time.Second)
 
-	// New Router
-	router := gin.New()
+	// Prometheus Exporter Config
+	p := ginprom.New(
+		ginprom.Engine(router),
+		ginprom.Subsystem("gin"),
+		ginprom.Path("/metrics"),
+	)
 
 	//Middlewares
+	router.Use(p.Instrument())
 	router.Use(gin.Recovery())
 	router.Use(chaos.Load())
-
-	router.Use(logger.SetLogger(logger.Config{
-		Logger:   &subLog,
-		UTC:      true,
-		SkipPath: []string{"/skip"},
-	}))
+	router.Use(logger.SetLogger(
+		logger.WithSkipPath([]string{"/skip"}),
+		logger.WithUTC(true),
+		logger.WithLogger(func(c *gin.Context, out io.Writer, latency time.Duration) zerolog.Logger {
+			return zerolog.New(out).With().
+				Str("method", c.Request.Method).
+				Str("path", c.Request.URL.Path).
+				Dur("latency", latency).
+				Logger()
+		}),
+	))
 
 	// Healthcheck Router
 	router.GET("/healthcheck", healthcheck.Ok)

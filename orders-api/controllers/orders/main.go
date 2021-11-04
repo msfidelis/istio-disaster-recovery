@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"fmt"
+	"os"
 	"orders-api/pkg/logger"
 	"orders-api/pkg/httpclient"
 	"github.com/gin-gonic/gin"
@@ -58,7 +59,7 @@ func Get(c *gin.Context) {
 	headers["Content-type"] = append(headers["Content-type"], "Application/json")
 
 	// Get Clients - Mock
-	responseClients, body := httpclient.Request("GET", "http://clients-api:8080", "/clients", headers, "{}")
+	responseClients, body := httpclient.Request("GET", os.Getenv("CLIENTS_API_HOST"), "/clients", headers, "{}")
 
 	if responseClients.StatusCode != 200 {
 		log.Error().
@@ -80,7 +81,7 @@ func Get(c *gin.Context) {
 	response.Client.PhoneNumber = client.PhoneNumber
 
 	// Get Payment
-	responsePayments, bodyPayment := httpclient.Request("GET", "http://payment-api:8080", fmt.Sprintf("/payments/%v", response.OrderId), headers, "{}")
+	responsePayments, bodyPayment := httpclient.Request("GET", os.Getenv("PAYMENT_API_HOST"), fmt.Sprintf("/payments/%v", response.OrderId), headers, "{}")
 
 	if responsePayments.StatusCode != 200 {
 		log.Error().

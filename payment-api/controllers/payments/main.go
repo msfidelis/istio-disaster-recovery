@@ -3,6 +3,7 @@ package payments
 import (
 	"net/http"
 	"fmt"
+	"os"
 	"payment-api/pkg/logger"
 	"payment-api/pkg/httpclient"
 	"github.com/gin-gonic/gin"
@@ -40,7 +41,8 @@ func Get(c *gin.Context) {
 		headers["Content-type"] = append(headers["Content-type"], "Application/json")
 	
 		// Get Clients - Mock
-		responseCC, body := httpclient.Request("POST", "http://cc-api:8080", "/cc", headers, "{}")
+		responseCC, body := httpclient.Request("POST", os.Getenv("CC_API_HOST"), "/cc", headers, "{}")
+
 
 		if responseCC.StatusCode != 200 {
 			log.Error().
