@@ -1,0 +1,25 @@
+definitions:
+  healthcheck.Response:
+    properties:
+      status:
+        type: integer
+    required:
+    - status
+    type: object
+info:
+  contact: {}
+  license: {}
+paths:
+  /healthcheck:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/healthcheck.Response'
+      summary: Return 200 status Ok in healthcheck
+      tags:
+      - Healthcheck
+swagger: "2.0"

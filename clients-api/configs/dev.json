@@ -1,0 +1,5 @@
+{
+    "Application": "clients-api",
+    "Env": "dev",
+    "Version": "v1"
+}

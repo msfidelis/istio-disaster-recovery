@@ -1,0 +1,5 @@
+{
+    "Application": "payment-api",
+    "Env": "test",
+    "Version": "v1"
+}

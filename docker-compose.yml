@@ -1,0 +1,66 @@
+version: "3.2"
+services:
+  clients-api:
+    build:
+        context: ./clients-api/
+        dockerfile: Dockerfile.dev
+    environment:
+      - ENVIRONMENT=dev
+      - CHAOS_MONKEY_ENABLED=true
+      - CHAOS_MONKEY_MODE=critical
+      - CHAOS_MONKEY_LATENCY=false
+      - CHAOS_MONKEY_EXCEPTION=false
+      - CHAOS_MONKEY_APP_KILLER=false
+      - CHAOS_MONKEY_MEMORY=false
+    ports:
+        - 1000:8080
+    volumes:
+        - ./clients-api:/go/src/clients-api
+  orders-api:
+    build:
+        context: ./orders-api/
+        dockerfile: Dockerfile.dev
+    environment:
+      - ENVIRONMENT=dev
+      - CHAOS_MONKEY_ENABLED=true
+      - CHAOS_MONKEY_MODE=critical
+      - CHAOS_MONKEY_LATENCY=false
+      - CHAOS_MONKEY_EXCEPTION=false
+      - CHAOS_MONKEY_APP_KILLER=false
+      - CHAOS_MONKEY_MEMORY=false
+    ports:
+        - 2000:8080
+    volumes:
+        - ./orders-api:/go/src/orders-api
+  payment-api:
+    build:
+        context: ./payment-api/
+        dockerfile: Dockerfile.dev
+    environment:
+      - ENVIRONMENT=dev
+      - CHAOS_MONKEY_ENABLED=true
+      - CHAOS_MONKEY_MODE=critical
+      - CHAOS_MONKEY_LATENCY=true
+      - CHAOS_MONKEY_EXCEPTION=true
+      - CHAOS_MONKEY_APP_KILLER=true
+      - CHAOS_MONKEY_MEMORY=true
+    ports:
+        - 3000:8080
+    volumes:
+        - ./payment-api:/go/src/payment-api
+  cc-api:
+    build:
+        context: ./cc-api/
+        dockerfile: Dockerfile.dev
+    environment:
+      - ENVIRONMENT=dev
+      - CHAOS_MONKEY_ENABLED=true
+      - CHAOS_MONKEY_MODE=critical
+      - CHAOS_MONKEY_LATENCY=true
+      - CHAOS_MONKEY_EXCEPTION=true
+      - CHAOS_MONKEY_APP_KILLER=true
+      - CHAOS_MONKEY_MEMORY=true
+    ports:
+        - 4000:8080
+    volumes:
+        - ./cc-api:/go/src/cc-api
