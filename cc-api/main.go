@@ -29,7 +29,6 @@ func main() {
 
 	router := gin.New()
 
-	// Logger
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if gin.IsDebugging() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)

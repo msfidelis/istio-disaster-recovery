@@ -12,12 +12,10 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/Depado/ginprom"
-	
+
 	chaos "github.com/msfidelis/gin-chaos-monkey"
 
 	"github.com/gin-gonic/gin"
-
-	_ "payment-api/docs"
 
 	"io"
 	"fmt"
