@@ -62,7 +62,7 @@ func main() {
 		ginprom.Subsystem("gin"),
 		ginprom.Path("/metrics"),
 	)
-
+	
 	//Middlewares
 	router.Use(p.Instrument())
 	router.Use(gin.Recovery())

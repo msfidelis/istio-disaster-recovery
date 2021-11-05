@@ -128,9 +128,26 @@ metadata:
 spec:
   hosts:
   - "api.clients.k8s.cluster"
-  - "clients-api.clients.svc.cluster.local"
   gateways:
   - clients-api-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: clients-api
+        port:
+          number: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: clients-api-internal
+  namespace: clients
+spec:
+  hosts:
+  - "clients-api.clients.svc.cluster.local"
   http:
   - match:
     - uri:

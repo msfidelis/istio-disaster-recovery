@@ -8,7 +8,7 @@ require (
 	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/gin-contrib/logger v0.2.0
 	github.com/gin-gonic/gin v1.7.4
-	github.com/msfidelis/gin-chaos-monkey v0.0.5
+	github.com/msfidelis/gin-chaos-monkey v0.0.6
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/rs/zerolog v1.26.0
 	github.com/swaggo/swag v1.7.4

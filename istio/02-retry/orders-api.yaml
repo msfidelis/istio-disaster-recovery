@@ -60,9 +60,9 @@ spec:
         - name: CHAOS_MONKEY_EXCEPTION
           value: "true"   
         - name: CHAOS_MONKEY_APP_KILLER
-          value: "false"   
+          value: "true"   
         - name: CHAOS_MONKEY_MEMORY
-          value: "true"
+          value: "false"
         - name: CLIENTS_API_HOST
           value: http://clients-api.clients.svc.cluster.local:8080
         - name: PAYMENT_API_HOST
@@ -157,6 +157,7 @@ metadata:
 spec:
   hosts:
   - "api.orders.k8s.cluster"
+  - "orders.k8s.raj.ninja"
   gateways:
   - orders-api-gateway
   http:
