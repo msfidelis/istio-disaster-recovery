@@ -3,20 +3,20 @@ kind: Namespace
 metadata:
   labels:
     istio-injection: enabled
-  name: cc
+  name: orders
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: cc-api
-  name: cc-api
-  namespace: cc
+    app: orders-api
+  name: orders-api
+  namespace: orders
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: cc-api
+      app: orders-api
   template:
     metadata:
       annotations:
@@ -24,13 +24,13 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"           
       labels:
-        app: cc-api
-        name: cc-api
+        app: orders-api
+        name: orders-api
         version: v1
     spec:
       containers:
-      - name: cc-api
-        image: fidelissauro/dr-cc-api:latest
+      - name: orders-api
+        image: fidelissauro/dr-orders-api:latest
         ports:
         - containerPort: 8080
           name: http
@@ -63,8 +63,10 @@ spec:
           value: "false"   
         - name: CHAOS_MONKEY_MEMORY
           value: "true"
-        - name: CC_API_HOST
-          value: http://api.cc.k8s.cluster:80
+        - name: CLIENTS_API_HOST
+          value: http://clients-api.clients.svc.cluster.local:8080
+        - name: PAYMENT_API_HOST
+          value: http://payment-api.payment.svc.cluster.local:8080
 
       # Multi-AZ
       affinity:
@@ -96,25 +98,25 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cc-api
-  namespace: cc   
+  name: orders-api
+  namespace: orders   
   labels:
-    app.kubernetes.io/name: cc-api
-    app.kubernetes.io/instance: cc-api 
+    app.kubernetes.io/name: orders-api
+    app.kubernetes.io/instance: orders-api 
 spec:
   ports:
   - name: web
     port: 8080
     protocol: TCP
   selector:
-    app: cc-api
+    app: orders-api
   type: ClusterIP
 ---
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: cc-api
-  namespace: cc
+  name: orders-api
+  namespace: orders
 spec:
   maxReplicas: 12
   minReplicas: 3
@@ -128,13 +130,13 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: cc-api
+    name: orders-api
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: cc-api-gateway
-  namespace: cc
+  name: orders-api-gateway
+  namespace: orders
 spec:
   selector:
     istio: ingressgateway
@@ -144,26 +146,55 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "api.cc.k8s.cluster"
-    - "cc-api.cc.svc.cluster.local"    
+    - "api.orders.k8s.cluster"
+    - "orders-api.orders.svc.cluster.local"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: cc-api
-  namespace: cc
+  name: orders-api
+  namespace: orders
 spec:
   hosts:
-  - "api.cc.k8s.cluster"
-  - "cc-api.cc.svc.cluster.local"  
+  - "api.orders.k8s.cluster"
   gateways:
-  - cc-api-gateway
+  - orders-api-gateway
   http:
   - match:
     - uri:
         prefix: /
     route:
     - destination:
-        host: cc-api
+        host: orders-api
         port:
           number: 8080
+    # Retry Example
+    retries:
+      attempts: 20
+      perTryTimeout: 2s
+      retryOn: gateway-error,connect-failure,refused-stream,5xx
+    timeout: 3s
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: orders-api-internal
+  namespace: orders
+spec:
+  hosts:
+  - "orders-api.orders.svc.cluster.local"
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: orders-api
+        port:
+          number: 8080
+    # Retry Example
+    retries:
+      attempts: 60
+      perTryTimeout: 2s
+      retryOn: gateway-error,connect-failure,refused-stream,5xx
+    timeout: 3s
