@@ -3,20 +3,20 @@ kind: Namespace
 metadata:
   labels:
     istio-injection: enabled
-  name: orders
+  name: payment
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: orders-api
-  name: orders-api
-  namespace: orders
+    app: payment-api
+  name: payment-api
+  namespace: payment
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: orders-api
+      app: payment-api
   template:
     metadata:
       annotations:
@@ -24,13 +24,13 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"           
       labels:
-        app: orders-api
-        name: orders-api
+        app: payment-api
+        name: payment-api
         version: v1
     spec:
       containers:
-      - name: orders-api
-        image: fidelissauro/dr-orders-api:latest
+      - name: payment-api
+        image: fidelissauro/dr-payment-api:latest
         ports:
         - containerPort: 8080
           name: http
@@ -63,60 +63,40 @@ spec:
           value: "true"   
         - name: CHAOS_MONKEY_MEMORY
           value: "false"
-        - name: CLIENTS_API_HOST
-          value: http://clients-api.clients.svc.cluster.local:8080
+        - name: CHAOS_MONKEY_CPU
+          value: "false"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "2000"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "5000"          
         - name: PAYMENT_API_HOST
           value: http://payment-api.payment.svc.cluster.local:8080
-
-      # Multi-AZ
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - cc-api
-              topologyKey: failure-domain.beta.kubernetes.io/zone
-            weight: 100  
-      
-      # Don't run replicas in same host
-          - podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - cc-api
-              topologyKey: kubernetes.io/hostname
-            weight: 100 
-
+        - name: CC_API_HOST
+          value: http://cc-api.cc.svc.cluster.local:8080
       terminationGracePeriodSeconds: 60
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: orders-api
-  namespace: orders   
+  name: payment-api
+  namespace: payment   
   labels:
-    app.kubernetes.io/name: orders-api
-    app.kubernetes.io/instance: orders-api 
+    app.kubernetes.io/name: payment-api
+    app.kubernetes.io/instance: payment-api 
 spec:
   ports:
   - name: web
     port: 8080
     protocol: TCP
   selector:
-    app: orders-api
+    app: payment-api
   type: ClusterIP
 ---
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: orders-api
-  namespace: orders
+  name: payment-api
+  namespace: payment
 spec:
   maxReplicas: 12
   minReplicas: 3
@@ -130,13 +110,13 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: orders-api
+    name: payment-api
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: orders-api-gateway
-  namespace: orders
+  name: payment-api-gateway
+  namespace: payment
 spec:
   selector:
     istio: ingressgateway
@@ -146,56 +126,45 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "api.orders.k8s.cluster"
-    - "orders-api.orders.svc.cluster.local"
+    - "api.payment.k8s.cluster"
+    - "payment-api.payment.svc.cluster.local"    
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: orders-api
-  namespace: orders
+  name: payment-api
+  namespace: payment
 spec:
   hosts:
-  - "api.orders.k8s.cluster"
-  - "orders.k8s.raj.ninja"
+  - "api.payment.k8s.cluster"
   gateways:
-  - orders-api-gateway
+  - payment-api-gateway
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
+  - route:
     - destination:
-        host: orders-api
+        host: payment-api
         port:
           number: 8080
-    # Retry Example
     retries:
-      attempts: 20
-      perTryTimeout: 2s
-      retryOn: gateway-error,connect-failure,refused-stream,5xx
-    timeout: 3s
+      attempts: 3
+      perTryTimeout: 500ms
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream          
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: orders-api-internal
-  namespace: orders
+  name: payment-api-internal
+  namespace: payment
 spec:
   hosts:
-  - "orders-api.orders.svc.cluster.local"
+  - "payment-api.payment.svc.cluster.local"  
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
+  - route:
     - destination:
-        host: orders-api
+        host: payment-api
         port:
           number: 8080
-    # Retry Example
     retries:
-      attempts: 60
-      perTryTimeout: 2s
-      retryOn: gateway-error,connect-failure,refused-stream,5xx
-    timeout: 3s
+      attempts: 3
+      perTryTimeout: 500ms
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream

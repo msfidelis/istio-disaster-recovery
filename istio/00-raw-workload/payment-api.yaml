@@ -62,7 +62,15 @@ spec:
         - name: CHAOS_MONKEY_APP_KILLER
           value: "true"   
         - name: CHAOS_MONKEY_MEMORY
-          value: "true"
+          value: "false"
+        - name: CHAOS_MONKEY_CPU
+          value: "false"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "2000"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "5000"          
+        - name: PAYMENT_API_HOST
+          value: http://payment-api.payment.svc.cluster.local:8080
         - name: CC_API_HOST
           value: http://cc-api.cc.svc.cluster.local:8080
       terminationGracePeriodSeconds: 60
@@ -119,7 +127,7 @@ spec:
       protocol: HTTP
     hosts:
     - "api.payment.k8s.cluster"
-    - "payment-api.payment.svc.cluster.local"
+    - "payment-api.payment.svc.cluster.local"    
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -129,14 +137,25 @@ metadata:
 spec:
   hosts:
   - "api.payment.k8s.cluster"
-  - "payment-api.payment.svc.cluster.local"
   gateways:
   - payment-api-gateway
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
+  - route:
+    - destination:
+        host: payment-api
+        port:
+          number: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: payment-api-internal
+  namespace: payment
+spec:
+  hosts:
+  - "payment-api.payment.svc.cluster.local"  
+  http:
+  - route:
     - destination:
         host: payment-api
         port:

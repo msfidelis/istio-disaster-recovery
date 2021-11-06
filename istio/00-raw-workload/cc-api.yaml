@@ -62,7 +62,13 @@ spec:
         - name: CHAOS_MONKEY_APP_KILLER
           value: "true"   
         - name: CHAOS_MONKEY_MEMORY
-          value: "true"
+          value: "false"
+        - name: CHAOS_MONKEY_CPU
+          value: "false"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "2000"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "5000"          
         - name: CC_API_HOST
           value: http://api.cc.k8s.cluster:80
       terminationGracePeriodSeconds: 60
@@ -132,10 +138,7 @@ spec:
   gateways:
   - cc-api-gateway
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
+  - route:
     - destination:
         host: cc-api
         port:
@@ -150,10 +153,7 @@ spec:
   hosts:
   - "cc-api.cc.svc.cluster.local"  
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
+  - route:
     - destination:
         host: cc-api
         port:
