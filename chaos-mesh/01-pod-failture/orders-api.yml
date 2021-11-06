@@ -1,0 +1,12 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: orders-pod-failure
+  namespace: orders
+spec:
+  action: pod-failure
+  mode: 50%
+  duration: "30s"
+  selector:
+    labelSelectors:
+      "app": "orders-api"

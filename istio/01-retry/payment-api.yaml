@@ -167,4 +167,5 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 500ms
-      retryOn: 5xx,gateway-error,connect-failure,refused-stream
+      # retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,refused-stream
+      retryOn: 5xx,gateway-error,connect-failure

@@ -3,20 +3,20 @@ kind: Namespace
 metadata:
   labels:
     istio-injection: enabled
-  name: clients
+  name: payment
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: clients-api
-  name: clients-api
-  namespace: clients
+    app: payment-api
+  name: payment-api
+  namespace: payment
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: clients-api
+      app: payment-api
   template:
     metadata:
       annotations:
@@ -24,13 +24,13 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"           
       labels:
-        app: clients-api
-        name: clients-api
+        app: payment-api
+        name: payment-api
         version: v1
     spec:
       containers:
-      - name: clients-api
-        image: fidelissauro/dr-clients-api:latest
+      - name: payment-api
+        image: fidelissauro/dr-payment-api:latest
         ports:
         - containerPort: 8080
           name: http
@@ -69,32 +69,34 @@ spec:
           value: "2000"
         - name: CHAOS_MONKEY_LATENCY_MIN_TIME
           value: "5000"          
-        - name: clients_API_HOST
-          value: http://api.clients.k8s.cluster:80
+        - name: PAYMENT_API_HOST
+          value: http://payment-api.payment.svc.cluster.local:8080
+        - name: CC_API_HOST
+          value: http://cc-api.cc.svc.cluster.local:8080
       terminationGracePeriodSeconds: 60
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: clients-api
-  namespace: clients   
+  name: payment-api
+  namespace: payment   
   labels:
-    app.kubernetes.io/name: clients-api
-    app.kubernetes.io/instance: clients-api 
+    app.kubernetes.io/name: payment-api
+    app.kubernetes.io/instance: payment-api 
 spec:
   ports:
   - name: web
     port: 8080
     protocol: TCP
   selector:
-    app: clients-api
+    app: payment-api
   type: ClusterIP
 ---
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: clients-api
-  namespace: clients
+  name: payment-api
+  namespace: payment
 spec:
   maxReplicas: 12
   minReplicas: 3
@@ -108,13 +110,13 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: clients-api
+    name: payment-api
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: clients-api-gateway
-  namespace: clients
+  name: payment-api-gateway
+  namespace: payment
 spec:
   selector:
     istio: ingressgateway
@@ -124,23 +126,23 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "api.clients.k8s.cluster"
-    - "clients-api.clients.svc.cluster.local"    
+    - "api.payment.k8s.cluster"
+    - "payment-api.payment.svc.cluster.local"    
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: clients-api
-  namespace: clients
+  name: payment-api
+  namespace: payment
 spec:
   hosts:
-  - "api.clients.k8s.cluster"
+  - "api.payment.k8s.cluster"
   gateways:
-  - clients-api-gateway
+  - payment-api-gateway
   http:
   - route:
     - destination:
-        host: clients-api
+        host: payment-api
         port:
           number: 8080
     retries:
@@ -151,18 +153,19 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: clients-api-internal
-  namespace: clients
+  name: payment-api-internal
+  namespace: payment
 spec:
   hosts:
-  - "clients-api.clients.svc.cluster.local"  
+  - "payment-api.payment.svc.cluster.local"  
   http:
   - route:
     - destination:
-        host: clients-api
+        host: payment-api
         port:
           number: 8080
     retries:
-      attempts: 3
+      attempts: 5
+      perTryTimeout: 500ms
       # retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,refused-stream
       retryOn: 5xx,gateway-error,connect-failure

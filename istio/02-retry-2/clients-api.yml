@@ -163,6 +163,6 @@ spec:
         port:
           number: 8080
     retries:
-      attempts: 3
+      attempts: 5
       # retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,refused-stream
       retryOn: 5xx,gateway-error,connect-failure

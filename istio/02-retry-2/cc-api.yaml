@@ -3,20 +3,20 @@ kind: Namespace
 metadata:
   labels:
     istio-injection: enabled
-  name: clients
+  name: cc
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: clients-api
-  name: clients-api
-  namespace: clients
+    app: cc-api
+  name: cc-api
+  namespace: cc
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: clients-api
+      app: cc-api
   template:
     metadata:
       annotations:
@@ -24,13 +24,13 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"           
       labels:
-        app: clients-api
-        name: clients-api
+        app: cc-api
+        name: cc-api
         version: v1
     spec:
       containers:
-      - name: clients-api
-        image: fidelissauro/dr-clients-api:latest
+      - name: cc-api
+        image: fidelissauro/dr-cc-api:latest
         ports:
         - containerPort: 8080
           name: http
@@ -69,32 +69,32 @@ spec:
           value: "2000"
         - name: CHAOS_MONKEY_LATENCY_MIN_TIME
           value: "5000"          
-        - name: clients_API_HOST
-          value: http://api.clients.k8s.cluster:80
+        - name: CC_API_HOST
+          value: http://api.cc.k8s.cluster:80
       terminationGracePeriodSeconds: 60
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: clients-api
-  namespace: clients   
+  name: cc-api
+  namespace: cc   
   labels:
-    app.kubernetes.io/name: clients-api
-    app.kubernetes.io/instance: clients-api 
+    app.kubernetes.io/name: cc-api
+    app.kubernetes.io/instance: cc-api 
 spec:
   ports:
   - name: web
     port: 8080
     protocol: TCP
   selector:
-    app: clients-api
+    app: cc-api
   type: ClusterIP
 ---
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: clients-api
-  namespace: clients
+  name: cc-api
+  namespace: cc
 spec:
   maxReplicas: 12
   minReplicas: 3
@@ -108,13 +108,13 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: clients-api
+    name: cc-api
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: clients-api-gateway
-  namespace: clients
+  name: cc-api-gateway
+  namespace: cc
 spec:
   selector:
     istio: ingressgateway
@@ -124,45 +124,46 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "api.clients.k8s.cluster"
-    - "clients-api.clients.svc.cluster.local"    
+    - "api.cc.k8s.cluster"
+    - "cc-api.cc.svc.cluster.local"    
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: clients-api
-  namespace: clients
+  name: cc-api
+  namespace: cc
 spec:
   hosts:
-  - "api.clients.k8s.cluster"
+  - "api.cc.k8s.cluster"
   gateways:
-  - clients-api-gateway
+  - cc-api-gateway
   http:
   - route:
     - destination:
-        host: clients-api
+        host: cc-api
         port:
           number: 8080
     retries:
       attempts: 3
       perTryTimeout: 500ms
-      retryOn: 5xx,gateway-error,connect-failure,refused-stream          
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: clients-api-internal
-  namespace: clients
+  name: cc-api-internal
+  namespace: cc
 spec:
   hosts:
-  - "clients-api.clients.svc.cluster.local"  
+  - "cc-api.cc.svc.cluster.local"  
   http:
   - route:
     - destination:
-        host: clients-api
+        host: cc-api
         port:
           number: 8080
     retries:
-      attempts: 3
+      attempts: 5
+      perTryTimeout: 500ms
       # retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,refused-stream
       retryOn: 5xx,gateway-error,connect-failure
