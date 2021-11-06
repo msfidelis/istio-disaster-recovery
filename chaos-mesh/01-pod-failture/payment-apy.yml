@@ -1,8 +1,8 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
-  name: orders-pod-failure
-  namespace: orders
+  name: payment-pod-failure
+  namespace: payment
 spec:
   action: pod-failure
   mode: fixed-percent
@@ -10,4 +10,4 @@ spec:
   duration: "30s"
   selector:
     labelSelectors:
-      "app": "orders-api"
+      "app": "payment-api"
