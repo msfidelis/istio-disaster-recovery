@@ -40,19 +40,21 @@ spec:
             memory: 128Mi
         startupProbe:
           failureThreshold: 10
+          successThreshold: 1
           httpGet:
             path: /readiness
             port: 8080
           periodSeconds: 10
         livenessProbe:
           failureThreshold: 10
+          successThreshold: 1
           httpGet:
             path: /liveness
             port: 8080
           periodSeconds: 10
         env:
         - name: CHAOS_MONKEY_ENABLED
-          value: "true"  
+          value: "false"  
         - name: CHAOS_MONKEY_MODE
           value: "critical" 
         - name: CHAOS_MONKEY_LATENCY
@@ -62,7 +64,15 @@ spec:
         - name: CHAOS_MONKEY_APP_KILLER
           value: "true"   
         - name: CHAOS_MONKEY_MEMORY
-          value: "true"
+          value: "false"
+        - name: CHAOS_MONKEY_CPU
+          value: "false"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "2000"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "5000"          
+        - name: PAYMENT_API_HOST
+          value: http://payment-api.payment.svc.cluster.local:8080
         - name: CC_API_HOST
           value: http://cc-api.cc.svc.cluster.local:8080
 
@@ -76,7 +86,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - cc-api
+                  - payment-api
               topologyKey: failure-domain.beta.kubernetes.io/zone
             weight: 100  
       
@@ -87,7 +97,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - cc-api
+                  - payment-api
               topologyKey: kubernetes.io/hostname
             weight: 100 
 
@@ -145,7 +155,7 @@ spec:
       protocol: HTTP
     hosts:
     - "api.payment.k8s.cluster"
-    - "payment-api.payment.svc.cluster.local"
+    - "payment-api.payment.svc.cluster.local"    
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -155,15 +165,54 @@ metadata:
 spec:
   hosts:
   - "api.payment.k8s.cluster"
-  - "payment-api.payment.svc.cluster.local"
   gateways:
   - payment-api-gateway
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
+  - route:
     - destination:
         host: payment-api
         port:
           number: 8080
+    retries:
+      attempts: 5
+      perTryTimeout: 500ms
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream          
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: payment-api-internal
+  namespace: payment
+spec:
+  hosts:
+  - "payment-api.payment.svc.cluster.local"  
+  http:
+  - route:
+    - destination:
+        host: payment-api
+        port:
+          number: 8080
+    retries:
+      attempts: 5
+      perTryTimeout: 500ms
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,resource-exhausted,unavailable,cancelled
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: payment
+  namespace: payment
+spec:
+  host: payment-api.payment.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 500
+      http:
+        http1MaxPendingRequests: 30
+        maxRequestsPerConnection: 100
+    outlierDetection:
+      consecutive5xxErrors: 2
+      interval: 300ms
+      baseEjectionTime: 60s
+      maxEjectionPercent: 100

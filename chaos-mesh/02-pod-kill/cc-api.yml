@@ -1,0 +1,15 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: cc-pod-kill
+  namespace: cc
+spec:
+  action: pod-kill
+  mode: fixed-percent
+  value: "90"
+  duration: "30s"
+  selector:
+    namespaces:
+      - cc
+    labelSelectors:
+      "app": "cc-api"

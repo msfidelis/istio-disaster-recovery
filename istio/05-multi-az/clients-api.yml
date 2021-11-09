@@ -40,19 +40,21 @@ spec:
             memory: 128Mi
         startupProbe:
           failureThreshold: 10
+          successThreshold: 1
           httpGet:
             path: /readiness
             port: 8080
           periodSeconds: 10
         livenessProbe:
           failureThreshold: 10
+          successThreshold: 1
           httpGet:
             path: /liveness
             port: 8080
           periodSeconds: 10
         env:
         - name: CHAOS_MONKEY_ENABLED
-          value: "true"  
+          value: "false"  
         - name: CHAOS_MONKEY_MODE
           value: "critical" 
         - name: CHAOS_MONKEY_LATENCY
@@ -62,8 +64,16 @@ spec:
         - name: CHAOS_MONKEY_APP_KILLER
           value: "true"   
         - name: CHAOS_MONKEY_MEMORY
-          value: "true"
-          
+          value: "false"
+        - name: CHAOS_MONKEY_CPU
+          value: "false"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "2000"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "5000"          
+        - name: clients_API_HOST
+          value: http://api.clients.k8s.cluster:80
+
       # Multi-AZ
       affinity:
         podAntiAffinity:
@@ -74,7 +84,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - cc-api
+                  - clients-api
               topologyKey: failure-domain.beta.kubernetes.io/zone
             weight: 100  
       
@@ -85,7 +95,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - cc-api
+                  - clients-api
               topologyKey: kubernetes.io/hostname
             weight: 100 
 
@@ -143,8 +153,7 @@ spec:
       protocol: HTTP
     hosts:
     - "api.clients.k8s.cluster"
-    - "clients-api.clients.svc.cluster.local"
-
+    - "clients-api.clients.svc.cluster.local"    
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -154,15 +163,53 @@ metadata:
 spec:
   hosts:
   - "api.clients.k8s.cluster"
-  - "clients-api.clients.svc.cluster.local"
   gateways:
   - clients-api-gateway
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
+  - route:
     - destination:
         host: clients-api
         port:
           number: 8080
+    retries:
+      attempts: 5
+      perTryTimeout: 500ms
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream          
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: clients-api-internal
+  namespace: clients
+spec:
+  hosts:
+  - "clients-api.clients.svc.cluster.local"  
+  http:
+  - route:
+    - destination:
+        host: clients-api
+        port:
+          number: 8080
+    retries:
+      attempts: 5
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,resource-exhausted,unavailable,cancelled
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: clients
+  namespace: clients
+spec:
+  host: clients-api.clients.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 500
+      http:
+        http1MaxPendingRequests: 30
+        maxRequestsPerConnection: 100
+    outlierDetection:
+      consecutive5xxErrors: 2
+      interval: 300ms
+      baseEjectionTime: 60s
+      maxEjectionPercent: 100

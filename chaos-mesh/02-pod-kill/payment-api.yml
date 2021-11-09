@@ -1,0 +1,15 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: payment-pod-kill
+  namespace: payment
+spec:
+  action: pod-kill
+  mode: fixed-percent
+  value: "90"
+  duration: "30s"
+  selector:
+    namespaces:
+      - payment
+    labelSelectors:
+      "app": "payment-api"

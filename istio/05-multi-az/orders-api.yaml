@@ -39,12 +39,14 @@ spec:
             cpu: 100m
             memory: 128Mi
         startupProbe:
+          successThreshold: 1
           failureThreshold: 10
           httpGet:
             path: /readiness
             port: 8080
           periodSeconds: 10
         livenessProbe:
+          successThreshold: 1
           failureThreshold: 10
           httpGet:
             path: /liveness
@@ -52,7 +54,7 @@ spec:
           periodSeconds: 10
         env:
         - name: CHAOS_MONKEY_ENABLED
-          value: "true"  
+          value: "false"  
         - name: CHAOS_MONKEY_MODE
           value: "critical" 
         - name: CHAOS_MONKEY_LATENCY
@@ -62,11 +64,17 @@ spec:
         - name: CHAOS_MONKEY_APP_KILLER
           value: "true"   
         - name: CHAOS_MONKEY_MEMORY
-          value: "true"
-        - name: CLIENTS_API_HOST
-          value: http://clients-api.clients.svc.cluster.local:8080
+          value: "false"
+        - name: CHAOS_MONKEY_CPU
+          value: "false"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "2000"
+        - name: CHAOS_MONKEY_LATENCY_MIN_TIME
+          value: "5000"          
         - name: PAYMENT_API_HOST
           value: http://payment-api.payment.svc.cluster.local:8080
+        - name: CLIENTS_API_HOST
+          value: http://clients-api.clients.svc.cluster.local:8080 
 
       # Multi-AZ
       affinity:
@@ -78,7 +86,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - cc-api
+                  - orders-api
               topologyKey: failure-domain.beta.kubernetes.io/zone
             weight: 100  
       
@@ -89,9 +97,10 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - cc-api
+                  - orders-api
               topologyKey: kubernetes.io/hostname
             weight: 100 
+
 
       terminationGracePeriodSeconds: 60
 ---
@@ -147,7 +156,7 @@ spec:
       protocol: HTTP
     hosts:
     - "api.orders.k8s.cluster"
-    - "orders-api.orders.svc.cluster.local"
+    - "orders-api.orders.svc.cluster.local"    
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -157,15 +166,54 @@ metadata:
 spec:
   hosts:
   - "api.orders.k8s.cluster"
-  - "orders-api.orders.svc.cluster.local"
   gateways:
   - orders-api-gateway
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
+  - route:
     - destination:
         host: orders-api
         port:
           number: 8080
+    retries:
+      attempts: 5
+      perTryTimeout: 500ms
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream          
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: orders-api-internal
+  namespace: orders
+spec:
+  hosts:
+  - "orders-api.orders.svc.cluster.local"  
+  http:
+  - route:
+    - destination:
+        host: orders-api
+        port:
+          number: 8080
+    retries:
+      attempts: 5
+      perTryTimeout: 500ms
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,resource-exhausted,unavailable,cancelled
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: orders
+  namespace: orders
+spec:
+  host: orders-api.orders.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 500
+      http:
+        http1MaxPendingRequests: 30
+        maxRequestsPerConnection: 100
+    outlierDetection:
+      consecutive5xxErrors: 2
+      interval: 300ms
+      baseEjectionTime: 60s
+      maxEjectionPercent: 100

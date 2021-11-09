@@ -39,12 +39,14 @@ spec:
             cpu: 100m
             memory: 128Mi
         startupProbe:
+          successThreshold: 1
           failureThreshold: 10
           httpGet:
             path: /readiness
             port: 8080
           periodSeconds: 10
         livenessProbe:
+          successThreshold: 1
           failureThreshold: 10
           httpGet:
             path: /liveness
@@ -146,7 +148,7 @@ spec:
         port:
           number: 8080
     retries:
-      attempts: 3
+      attempts: 5
       perTryTimeout: 500ms
       retryOn: 5xx,gateway-error,connect-failure,refused-stream          
 ---
@@ -165,6 +167,26 @@ spec:
         port:
           number: 8080
     retries:
-      attempts: 10
+      attempts: 5
       perTryTimeout: 500ms
       retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,resource-exhausted,unavailable,cancelled
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: orders
+  namespace: orders
+spec:
+  host: orders-api.orders.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 500
+      http:
+        http1MaxPendingRequests: 30
+        maxRequestsPerConnection: 100
+    outlierDetection:
+      consecutive5xxErrors: 2
+      interval: 300ms
+      baseEjectionTime: 60s
+      maxEjectionPercent: 100

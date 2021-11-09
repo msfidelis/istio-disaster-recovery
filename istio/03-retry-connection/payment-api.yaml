@@ -52,7 +52,7 @@ spec:
           periodSeconds: 10
         env:
         - name: CHAOS_MONKEY_ENABLED
-          value: "true"  
+          value: "false"  
         - name: CHAOS_MONKEY_MODE
           value: "critical" 
         - name: CHAOS_MONKEY_LATENCY
@@ -165,6 +165,6 @@ spec:
         port:
           number: 8080
     retries:
-      attempts: 5
+      attempts: 10
       perTryTimeout: 500ms
-      retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset
+      retryOn: 5xx,gateway-error,connect-failure,refused-stream,reset,resource-exhausted,unavailable,cancelled
