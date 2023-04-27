@@ -1,0 +1,13 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: clients-pod-failure
+  namespace: clients
+spec:
+  action: pod-failure
+  mode: fixed-percent
+  value: "90"
+  duration: "30s"
+  selector:
+    labelSelectors:
+      "app": "clients-api"
