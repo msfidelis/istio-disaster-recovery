@@ -24,7 +24,7 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 54,
+    "id": 27,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -101,7 +101,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 1
+              "y": 9
             },
             "id": 15,
             "options": {
@@ -187,6 +187,124 @@
                     }
                   ]
                 },
+                "unit": "s"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 7,
+              "w": 24,
+              "x": 0,
+              "y": 16
+            },
+            "id": 44,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.50,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"orders-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"orders-api\"}[1m]))by (le))",
+                "legendFormat": "P50",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.90,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"orders-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"orders-api\"}[1m]))by (le))",
+                "hide": false,
+                "legendFormat": "P90",
+                "range": true,
+                "refId": "B"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.99,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"orders-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"orders-api\"}[1m]))by (le))",
+                "hide": false,
+                "legendFormat": "P99",
+                "range": true,
+                "refId": "C"
+              }
+            ],
+            "title": "Orders API - Response Time",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "blue",
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 15,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": true,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
                 "unit": "ops"
               },
               "overrides": []
@@ -195,7 +313,7 @@
               "h": 9,
               "w": 24,
               "x": 0,
-              "y": 8
+              "y": 23
             },
             "id": 33,
             "options": {
@@ -259,7 +377,7 @@
               "h": 8,
               "w": 8,
               "x": 0,
-              "y": 17
+              "y": 32
             },
             "id": 2,
             "options": {
@@ -326,7 +444,7 @@
               "h": 8,
               "w": 8,
               "x": 8,
-              "y": 17
+              "y": 32
             },
             "id": 3,
             "options": {
@@ -394,7 +512,7 @@
               "h": 8,
               "w": 8,
               "x": 16,
-              "y": 17
+              "y": 32
             },
             "id": 4,
             "options": {
@@ -573,7 +691,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 25
+              "y": 40
             },
             "id": 30,
             "interval": "1m",
@@ -625,7 +743,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 32
+              "y": 47
             },
             "hiddenSeries": false,
             "id": 39,
@@ -804,7 +922,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 2
+              "y": 18
             },
             "id": 16,
             "options": {
@@ -890,6 +1008,124 @@
                     }
                   ]
                 },
+                "unit": "s"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 7,
+              "w": 24,
+              "x": 0,
+              "y": 25
+            },
+            "id": 47,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.50,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"clients-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"clients-api\"}[1m]))by (le))",
+                "legendFormat": "P50",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.90,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"clients-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"clients-api\"}[1m]))by (le))",
+                "hide": false,
+                "legendFormat": "P90",
+                "range": true,
+                "refId": "B"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.99,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"clients-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"clients-api\"}[1m]))by (le))",
+                "hide": false,
+                "legendFormat": "P99",
+                "range": true,
+                "refId": "C"
+              }
+            ],
+            "title": "Clients API - Response Time",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "blue",
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 15,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": true,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
                 "unit": "ops"
               },
               "overrides": []
@@ -898,7 +1134,7 @@
               "h": 9,
               "w": 24,
               "x": 0,
-              "y": 9
+              "y": 32
             },
             "id": 37,
             "options": {
@@ -945,8 +1181,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
-                      "value": null
+                      "color": "green"
                     },
                     {
                       "color": "red",
@@ -962,7 +1197,7 @@
               "h": 8,
               "w": 8,
               "x": 0,
-              "y": 18
+              "y": 41
             },
             "id": 21,
             "options": {
@@ -1012,8 +1247,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
-                      "value": null
+                      "color": "green"
                     },
                     {
                       "color": "red",
@@ -1029,7 +1263,7 @@
               "h": 8,
               "w": 8,
               "x": 8,
-              "y": 18
+              "y": 41
             },
             "id": 22,
             "options": {
@@ -1080,8 +1314,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
-                      "value": null
+                      "color": "green"
                     },
                     {
                       "color": "red",
@@ -1097,7 +1330,7 @@
               "h": 8,
               "w": 8,
               "x": 16,
-              "y": 18
+              "y": 41
             },
             "id": 23,
             "options": {
@@ -1178,8 +1411,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
-                      "value": null
+                      "color": "green"
                     },
                     {
                       "color": "red",
@@ -1276,7 +1508,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 26
+              "y": 49
             },
             "id": 38,
             "interval": "1m",
@@ -1328,7 +1560,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 33
+              "y": 56
             },
             "hiddenSeries": false,
             "id": 32,
@@ -1593,6 +1825,124 @@
                     }
                   ]
                 },
+                "unit": "s"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 7,
+              "w": 24,
+              "x": 0,
+              "y": 10
+            },
+            "id": 49,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.50,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"payment-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"payment-api\"}[1m]))by (le))",
+                "legendFormat": "P50",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.90,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"payment-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"payment-api\"}[1m]))by (le))",
+                "hide": false,
+                "legendFormat": "P90",
+                "range": true,
+                "refId": "B"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.99,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"payment-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"payment-api\"}[1m]))by (le))",
+                "hide": false,
+                "legendFormat": "P99",
+                "range": true,
+                "refId": "C"
+              }
+            ],
+            "title": "Payments API - Response Time",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "blue",
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 15,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": true,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
                 "unit": "ops"
               },
               "overrides": []
@@ -1601,7 +1951,7 @@
               "h": 9,
               "w": 24,
               "x": 0,
-              "y": 10
+              "y": 17
             },
             "id": 34,
             "options": {
@@ -1648,8 +1998,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
-                      "value": null
+                      "color": "green"
                     },
                     {
                       "color": "red",
@@ -1665,7 +2014,7 @@
               "h": 8,
               "w": 8,
               "x": 0,
-              "y": 19
+              "y": 26
             },
             "id": 17,
             "options": {
@@ -1715,8 +2064,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
-                      "value": null
+                      "color": "green"
                     },
                     {
                       "color": "red",
@@ -1732,7 +2080,7 @@
               "h": 8,
               "w": 8,
               "x": 8,
-              "y": 19
+              "y": 26
             },
             "id": 18,
             "options": {
@@ -1783,8 +2131,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
-                      "value": null
+                      "color": "green"
                     },
                     {
                       "color": "red",
@@ -1800,7 +2147,7 @@
               "h": 8,
               "w": 8,
               "x": 16,
-              "y": 19
+              "y": 26
             },
             "id": 19,
             "options": {
@@ -1881,8 +2228,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "green",
-                      "value": null
+                      "color": "green"
                     },
                     {
                       "color": "red",
@@ -1979,7 +2325,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 27
+              "y": 34
             },
             "id": 40,
             "interval": "1m",
@@ -2031,7 +2377,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 34
+              "y": 41
             },
             "hiddenSeries": false,
             "id": 41,
@@ -2210,7 +2556,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 4
+              "y": 73
             },
             "id": 24,
             "options": {
@@ -2296,6 +2642,124 @@
                     }
                   ]
                 },
+                "unit": "s"
+              },
+              "overrides": []
+            },
+            "gridPos": {
+              "h": 7,
+              "w": 24,
+              "x": 0,
+              "y": 80
+            },
+            "id": 45,
+            "options": {
+              "legend": {
+                "calcs": [],
+                "displayMode": "list",
+                "placement": "bottom",
+                "showLegend": true
+              },
+              "tooltip": {
+                "mode": "single",
+                "sort": "none"
+              }
+            },
+            "targets": [
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.50,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"cc-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"cc-api\"}[1m]))by (le))",
+                "legendFormat": "P50",
+                "range": true,
+                "refId": "A"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.90,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"cc-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"cc-api\"}[1m]))by (le))",
+                "hide": false,
+                "legendFormat": "P90",
+                "range": true,
+                "refId": "B"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "editorMode": "code",
+                "expr": "(histogram_quantile(0.99,sum(irate(istio_request_duration_milliseconds_bucket{destination_workload=~\"cc-api\"}[1m]))by (le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{destination_workload=~\"cc-api\"}[1m]))by (le))",
+                "hide": false,
+                "legendFormat": "P99",
+                "range": true,
+                "refId": "C"
+              }
+            ],
+            "title": "CC API - Response Time",
+            "type": "timeseries"
+          },
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "fixedColor": "blue",
+                  "mode": "palette-classic"
+                },
+                "custom": {
+                  "axisCenteredZero": false,
+                  "axisColorMode": "text",
+                  "axisLabel": "",
+                  "axisPlacement": "auto",
+                  "barAlignment": 0,
+                  "drawStyle": "line",
+                  "fillOpacity": 15,
+                  "gradientMode": "none",
+                  "hideFrom": {
+                    "legend": false,
+                    "tooltip": false,
+                    "viz": false
+                  },
+                  "lineInterpolation": "linear",
+                  "lineWidth": 1,
+                  "pointSize": 5,
+                  "scaleDistribution": {
+                    "type": "linear"
+                  },
+                  "showPoints": "always",
+                  "spanNulls": true,
+                  "stacking": {
+                    "group": "A",
+                    "mode": "none"
+                  },
+                  "thresholdsStyle": {
+                    "mode": "off"
+                  }
+                },
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
                 "unit": "ops"
               },
               "overrides": []
@@ -2304,7 +2768,7 @@
               "h": 9,
               "w": 24,
               "x": 0,
-              "y": 11
+              "y": 87
             },
             "id": 36,
             "options": {
@@ -2368,7 +2832,7 @@
               "h": 8,
               "w": 8,
               "x": 0,
-              "y": 20
+              "y": 96
             },
             "id": 25,
             "options": {
@@ -2435,7 +2899,7 @@
               "h": 8,
               "w": 8,
               "x": 8,
-              "y": 20
+              "y": 96
             },
             "id": 26,
             "options": {
@@ -2503,7 +2967,7 @@
               "h": 8,
               "w": 8,
               "x": 16,
-              "y": 20
+              "y": 96
             },
             "id": 27,
             "options": {
@@ -2682,7 +3146,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 28
+              "y": 104
             },
             "id": 42,
             "interval": "1m",
@@ -2734,7 +3198,7 @@
               "h": 7,
               "w": 24,
               "x": 0,
-              "y": 35
+              "y": 111
             },
             "hiddenSeries": false,
             "id": 43,
@@ -2856,6 +3320,6 @@
     "timezone": "",
     "title": "SLOs - Talk Istio",
     "uid": "1Ddjfiy4z",
-    "version": 9,
+    "version": 2,
     "weekStart": ""
   }

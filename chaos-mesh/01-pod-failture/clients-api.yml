@@ -6,8 +6,8 @@ metadata:
 spec:
   action: pod-failure
   mode: fixed-percent
-  value: "90"
-  duration: "30s"
+  value: "50"
+  duration: "60s"
   selector:
     labelSelectors:
       "app": "clients-api"

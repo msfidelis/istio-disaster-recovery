@@ -54,7 +54,7 @@ spec:
         - name: CHAOS_MONKEY_ENABLED
           value: "true"  
         - name: CHAOS_MONKEY_MODE
-          value: "critical" 
+          value: "hell" 
         - name: CHAOS_MONKEY_LATENCY
           value: "true"            
         - name: CHAOS_MONKEY_EXCEPTION
